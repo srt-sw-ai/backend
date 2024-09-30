@@ -1,0 +1,94 @@
+definitions:
+  dto.CreateReportDto:
+    properties:
+      content:
+        type: string
+      date:
+        type: string
+      location:
+        type: string
+      title:
+        type: string
+      type:
+        type: string
+    required:
+    - content
+    - date
+    - location
+    - title
+    - type
+    type: object
+info:
+  contact: {}
+paths:
+  /reports:
+    get:
+      description: 모든 리포트를 조회합니다
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: 모든 리포트 조회
+      tags:
+      - reports
+    post:
+      consumes:
+      - application/json
+      description: 새로운 리포트를 생성합니다
+      parameters:
+      - description: 리포트 정보
+        in: body
+        name: report
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateReportDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: 새 리포트 생성
+      tags:
+      - reports
+  /reports/user:
+    get:
+      description: 특정 사용자의 모든 리포트를 조회합니다
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: 사용자별 리포트 조회
+      tags:
+      - reports
+swagger: "2.0"
