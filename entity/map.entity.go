@@ -1,7 +1,9 @@
 package entity
 
+import "gorm.io/gorm"
+
 type Map struct {
-	ID        uint    `gorm:"primaryKey;autoIncrement" json:"id"`
+	gorm.Model
 	Type      string  `json:"type"`
 	Latitude  float64 `json:"latitude"`
 	Longitude float64 `json:"longitude"`

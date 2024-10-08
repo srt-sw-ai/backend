@@ -10,10 +10,14 @@ import (
 
 type ReportsController struct {
 	reportsService *service.ReportsService
+	mapService     *service.MapService
 }
 
-func NewReportsController(reportsService *service.ReportsService) *ReportsController {
-	return &ReportsController{reportsService: reportsService}
+func NewReportsController(reportsService *service.ReportsService, mapService *service.MapService) *ReportsController {
+	return &ReportsController{
+		reportsService: reportsService,
+		mapService:     mapService,
+	}
 }
 
 func (c *ReportsController) CreateReport(ctx *fiber.Ctx) error {
@@ -24,6 +28,27 @@ func (c *ReportsController) CreateReport(ctx *fiber.Ctx) error {
 
 	userId := ctx.Locals("userId").(uint)
 	result := c.reportsService.CreateReport(userId, createReportDto)
+
+	if result.Status == fiber.StatusCreated {
+		reportId, ok := result.Data.(fiber.Map)["reportId"].(uint)
+		if !ok {
+			return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "신고 ID를 가져오는데 실패했습니다"})
+		}
+
+		createMarkerDto := dto.CreateMarkerDto{
+			Type:      createReportDto.Type,
+			Latitude:  createReportDto.Latitude,
+			Longitude: createReportDto.Longitude,
+			ReportID:  int(reportId),
+			UserID:    userId,
+		}
+
+		markerResult := c.mapService.CreateMarker(userId, createMarkerDto)
+		if markerResult.Status != fiber.StatusCreated {
+			return ctx.Status(markerResult.Status).JSON(markerResult.Data)
+		}
+	}
+
 	return ctx.Status(result.Status).JSON(result.Data)
 }
 

@@ -15,3 +15,10 @@ type EditProfileDto struct {
 	NickName string `json:"nickName"`
 	Email    string `json:"email"`
 }
+
+type ProfileDto struct {
+	ID       uint   `json:"id"`
+	Email    string `json:"email"`
+	NickName string `json:"nickName"`
+	ImageUri string `json:"imageUri,omitempty"`
+}

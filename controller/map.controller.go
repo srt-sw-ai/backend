@@ -24,9 +24,7 @@ func (c *MapController) CreateMarker(ctx *fiber.Ctx) error {
 	}
 
 	userId := ctx.Locals("userId").(uint)
-	createMarkerDto.UserID = userId
-
-	result := c.mapService.CreateMarker(&createMarkerDto)
+	result := c.mapService.CreateMarker(userId, createMarkerDto)
 	return ctx.Status(result.Status).JSON(result.Data)
 }
 
@@ -36,11 +34,11 @@ func (c *MapController) FindAllMarker(ctx *fiber.Ctx) error {
 }
 
 func (c *MapController) FindMarker(ctx *fiber.Ctx) error {
-	markerID, err := strconv.Atoi(ctx.Params("markerId"))
+	markerID, err := strconv.ParseUint(ctx.Params("markerId"), 10, 32)
 	if err != nil {
-		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "잘못된 위치 ID입니다"})
+		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{"success": false, "message": "잘못된 위치 ID입니다"})
 	}
 
-	result := c.mapService.FindMarker(markerID)
+	result := c.mapService.FindMarker(uint(markerID))
 	return ctx.Status(result.Status).JSON(result.Data)
 }

@@ -44,6 +44,11 @@ func (c *AuthController) Refresh(ctx *fiber.Ctx) error {
 func (c *AuthController) GetProfile(ctx *fiber.Ctx) error {
 	userId := ctx.Locals("userId").(uint)
 	result := c.authService.GetProfile(userId)
+	
+	if result.Status != fiber.StatusOK {
+		return ctx.Status(result.Status).JSON(result.Data)
+	}
+
 	return ctx.Status(result.Status).JSON(result.Data)
 }
 

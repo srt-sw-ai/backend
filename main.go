@@ -42,11 +42,11 @@ func main() {
 	authService := service.NewAuthService(db, cfg.JWTSecret)
 	authController := controller.NewAuthController(authService)
 
-	reportsService := service.NewReportsService(db)
-	reportsController := controller.NewReportsController(reportsService)
-
 	mapService := service.NewMapService(db)
 	mapController := controller.NewMapController(mapService)
+
+	reportsService := service.NewReportsService(db)
+	reportsController := controller.NewReportsController(reportsService, mapService)
 
 	api := app.Group("/auth")
 	api.Post("/signup", authController.Signup)

@@ -19,14 +19,14 @@ func NewReportsService(db *gorm.DB) *ReportsService {
 
 func (s *ReportsService) CreateReport(userId uint, createReportDto dto.CreateReportDto) common.ServiceResult {
 	report := entity.Report{
-		Type:     createReportDto.Type,
-		Title:    createReportDto.Title,
-		Content:  createReportDto.Content,
-		Location: createReportDto.Location,
-		Date:     createReportDto.Date,
-		UserID:   userId,
+		Type:      createReportDto.Type,
+		Title:     createReportDto.Title,
+		Content:   createReportDto.Content,
+		UserID:    userId,
+		Latitude:  createReportDto.Latitude,
+		Longitude: createReportDto.Longitude,
 	}
-	
+
 	if err := s.DB.Create(&report).Error; err != nil {
 		return common.ServiceResult{
 			Status: fiber.StatusInternalServerError,
@@ -36,7 +36,7 @@ func (s *ReportsService) CreateReport(userId uint, createReportDto dto.CreateRep
 
 	return common.ServiceResult{
 		Status: fiber.StatusCreated,
-		Data:   fiber.Map{"success": true},
+		Data:   fiber.Map{"success": true, "reportId": report.ID},
 	}
 }
 

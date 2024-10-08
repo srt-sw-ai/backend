@@ -116,7 +116,14 @@ func (s *AuthService) GetProfile(userId uint) common.ServiceResult {
 		return common.ServiceResult{Status: fiber.StatusNotFound, Data: fiber.Map{"error": "프로필을 찾을 수 없습니다"}}
 	}
 
-	return common.ServiceResult{Status: fiber.StatusOK, Data: user}
+	profileDto := dto.ProfileDto{
+		ID:       user.ID,
+		Email:    user.Email,
+		NickName: user.NickName,
+		ImageUri: user.ImageUri,
+	}
+
+	return common.ServiceResult{Status: fiber.StatusOK, Data: profileDto}
 }
 
 func (s *AuthService) EditProfile(userId uint, editProfileDto dto.EditProfileDto) common.ServiceResult {
