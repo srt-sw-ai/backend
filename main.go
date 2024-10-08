@@ -1,35 +1,37 @@
 package main
 
 import (
-	"github.com/gofiber/contrib/swagger"
 	"log"
 
-	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/logger"
+	"github.com/gofiber/contrib/swagger"
+
 	"swai/config"
 	"swai/controller"
 	_ "swai/docs"
 	"swai/middleware"
 	"swai/service"
+
+	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/logger"
 )
 
 func main() {
 	cfg, err := config.LoadConfig()
 
 	if err != nil {
-		log.Fatalf("Failed to load configuration: %v", err)
+		log.Fatalf("구성을 로드하지 못했습니다. %v", err)
 	}
 
 	db, err := config.InitDB(&cfg)
 	if err != nil {
-		log.Fatalf("Failed to initialize database: %v", err)
+		log.Fatalf("데이터베이스 초기화 실패: %v", err)
 	}
 
 	var ConfigDefault = swagger.Config{
 		BasePath: "/",
 		FilePath: "./docs/swagger.json",
 		Path:     "swagger",
-		Title:    "Swagger API Docs",
+		Title:    "Swagger API Documention",
 	}
 
 	app := fiber.New()
@@ -42,6 +44,9 @@ func main() {
 
 	reportsService := service.NewReportsService(db)
 	reportsController := controller.NewReportsController(reportsService)
+
+	mapService := service.NewMapService(db)
+	mapController := controller.NewMapController(mapService)
 
 	api := app.Group("/auth")
 	api.Post("/signup", authController.Signup)
@@ -60,6 +65,12 @@ func main() {
 	reports.Get("/", reportsController.FindAllReports)
 	reports.Get("/by-user", reportsController.FindReportByUserId)
 	reports.Get("/:reportId", reportsController.FindReport)
+
+	mapGroup := app.Group("/map")
+	mapGroup.Use(middleware.JWTMiddleware(cfg.JWTSecret))
+	mapGroup.Post("/", mapController.CreateMarker)
+	mapGroup.Get("/", mapController.FindAllMarker)
+	mapGroup.Get("/:markerId", mapController.FindMarker)
 
 	log.Fatal(app.Listen(":8080"))
 }

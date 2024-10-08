@@ -1,9 +1,11 @@
 package service
 
 import (
+	"swai/common"
 	"swai/dto"
 	"swai/entity"
 
+	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm"
 )
 
@@ -15,7 +17,7 @@ func NewReportsService(db *gorm.DB) *ReportsService {
 	return &ReportsService{DB: db}
 }
 
-func (s *ReportsService) CreateReport(userId uint, createReportDto dto.CreateReportDto) error {
+func (s *ReportsService) CreateReport(userId uint, createReportDto dto.CreateReportDto) common.ServiceResult {
 	report := entity.Report{
 		Type:     createReportDto.Type,
 		Title:    createReportDto.Title,
@@ -24,31 +26,61 @@ func (s *ReportsService) CreateReport(userId uint, createReportDto dto.CreateRep
 		Date:     createReportDto.Date,
 		UserID:   userId,
 	}
-	return s.DB.Create(&report).Error
+	
+	if err := s.DB.Create(&report).Error; err != nil {
+		return common.ServiceResult{
+			Status: fiber.StatusInternalServerError,
+			Data:   fiber.Map{"success": false, "message": "신고 생성에 실패했습니다"},
+		}
+	}
+
+	return common.ServiceResult{
+		Status: fiber.StatusCreated,
+		Data:   fiber.Map{"success": true},
+	}
 }
 
-func (s *ReportsService) FindAllReports() ([]entity.Report, error) {
+func (s *ReportsService) FindAllReports() common.ServiceResult {
 	var reports []entity.Report
-	err := s.DB.Find(&reports).Error
-	return reports, err
+	if err := s.DB.Find(&reports).Error; err != nil {
+		return common.ServiceResult{
+			Status: fiber.StatusInternalServerError,
+			Data:   fiber.Map{"success": false, "message": "신고 조회에 실패했습니다"},
+		}
+	}
+
+	return common.ServiceResult{
+		Status: fiber.StatusOK,
+		Data:   fiber.Map{"success": true, "body": reports},
+	}
 }
 
-func (s *ReportsService) FindReport(id uint) (*entity.Report, error) {
+func (s *ReportsService) FindReport(id uint) common.ServiceResult {
 	var report entity.Report
-	err := s.DB.First(&report, id).Error
-	if err != nil {
-		return nil, err
+	if err := s.DB.First(&report, id).Error; err != nil {
+		return common.ServiceResult{
+			Status: fiber.StatusNotFound,
+			Data:   fiber.Map{"success": false, "message": "신고를 찾을 수 없습니다"},
+		}
 	}
-	return &report, nil
+
+	return common.ServiceResult{
+		Status: fiber.StatusOK,
+		Data:   fiber.Map{"success": true, "body": report},
+	}
 }
 
-func (s *ReportsService) FindReportByUserId(userId uint) ([]entity.Report, error) {
+func (s *ReportsService) FindReportByUserId(userId uint) common.ServiceResult {
 	var reports []entity.Report
-
-	err := s.DB.Where("user_id = ?", userId).Find(&reports).Error
-	if err != nil {
-		return nil, err
+	if err := s.DB.Where("user_id = ?", userId).Find(&reports).Error; err != nil {
+		return common.ServiceResult{
+			Status: fiber.StatusInternalServerError,
+			Data:   fiber.Map{"success": false, "message": "신고 조회에 실패했습니다"},
+		}
 	}
 
-	return reports, nil
+	return common.ServiceResult{
+		Status: fiber.StatusOK,
+		Data:   fiber.Map{"success": true, "body": reports},
+	}
 }
