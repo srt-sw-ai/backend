@@ -15,62 +15,78 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/logger"
 )
 
+// @title Swagger API Documentation
+// @version 1.0
+// @description This is a sample server for a Fiber application.
+// @termsOfService http://swagger.io/terms/
+
+// @contact.name API Support
+// @contact.url http://www.swagger.io/support
+// @contact.email support@swagger.io
+
+// @license.name Apache 2.0
+// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
+
+// @host localhost:8080
+// @BasePath /
+// @schemes http
+
 func main() {
-	cfg, err := config.LoadConfig()
+    cfg, err := config.LoadConfig()
 
-	if err != nil {
-		log.Fatalf("구성을 로드하지 못했습니다. %v", err)
-	}
+    if err != nil {
+        log.Fatalf("구성을 로드하지 못했습니다. %v", err)
+    }
 
-	db, err := config.InitDB(&cfg)
-	if err != nil {
-		log.Fatalf("데이터베이스 초기화 실패: %v", err)
-	}
+    db, err := config.InitDB(&cfg)
+    if err != nil {
+        log.Fatalf("데이터베이스 초기화 실패: %v", err)
+    }
 
-	var ConfigDefault = swagger.Config{
-		BasePath: "/",
-		FilePath: "./docs/swagger.json",
-		Path:     "swagger",
-		Title:    "Swagger API Documention",
-	}
+    var ConfigDefault = swagger.Config{
+        BasePath: "/",
+        FilePath: "./docs/swagger.json",
+        Path:     "swagger",
+        Title:    "Swagger API Documentation",
+    }
 
-	app := fiber.New()
+    app := fiber.New()
 
-	app.Use(logger.New())
-	app.Use(swagger.New(ConfigDefault))
+    app.Use(logger.New())
+    app.Use(swagger.New(ConfigDefault))
 
-	authService := service.NewAuthService(db, cfg.JWTSecret)
-	authController := controller.NewAuthController(authService)
+    authService := service.NewAuthService(db, cfg.JWTSecret)
+    authController := controller.NewAuthController(authService)
 
-	mapService := service.NewMapService(db)
-	mapController := controller.NewMapController(mapService)
+    mapService := service.NewMapService(db)
+    mapController := controller.NewMapController(mapService)
 
-	reportsService := service.NewReportsService(db)
-	reportsController := controller.NewReportsController(reportsService, mapService)
+    reportsService := service.NewReportsService(db)
+    reportsController := controller.NewReportsController(reportsService, mapService)
 
-	api := app.Group("/auth")
-	api.Post("/signup", authController.Signup)
-	api.Post("/signin", authController.Signin)
-	api.Get("/refresh", authController.Refresh)
+    api := app.Group("/auth")
+    api.Post("/signup", authController.Signup)
+    api.Post("/signin", authController.Signin)
+    api.Get("/refresh", authController.Refresh)
 
-	api.Use(middleware.JWTMiddleware(cfg.JWTSecret))
-	api.Get("/me", authController.GetProfile)
-	api.Patch("/me", authController.EditProfile)
-	api.Post("/logout", authController.Logout)
-	api.Delete("/me", authController.DeleteAccount)
+    api.Use(middleware.JWTMiddleware(cfg.JWTSecret))
+    api.Get("/me", authController.GetProfile)
+    api.Patch("/me", authController.EditProfile)
+    api.Post("/logout", authController.Logout)
+    api.Delete("/me", authController.DeleteAccount)
 
-	reports := app.Group("/reports")
-	reports.Use(middleware.JWTMiddleware(cfg.JWTSecret))
-	reports.Post("/", reportsController.CreateReport)
-	reports.Get("/", reportsController.FindAllReports)
-	reports.Get("/by-user", reportsController.FindReportByUserId)
-	reports.Get("/:reportId", reportsController.FindReport)
+    reports := app.Group("/reports")
+    reports.Use(middleware.JWTMiddleware(cfg.JWTSecret))
+    reports.Post("/", reportsController.CreateReport)
+    reports.Get("/", reportsController.FindAllReports)
+    reports.Get("/by-user", reportsController.FindReportByUserId)
+    reports.Get("/:reportId", reportsController.FindReport)
 
-	mapGroup := app.Group("/map")
-	mapGroup.Use(middleware.JWTMiddleware(cfg.JWTSecret))
-	mapGroup.Post("/", mapController.CreateMarker)
-	mapGroup.Get("/", mapController.FindAllMarker)
-	mapGroup.Get("/:markerId", mapController.FindMarker)
+    mapGroup := app.Group("/map")
+    mapGroup.Use(middleware.JWTMiddleware(cfg.JWTSecret))
+    mapGroup.Post("/", mapController.CreateMarker)
+    mapGroup.Get("/", mapController.FindAllMarker)
+    mapGroup.Get("/:markerId", mapController.FindMarker)
 
-	log.Fatal(app.Listen(":8080"))
+    log.Fatal(app.Listen(":8080"))
 }

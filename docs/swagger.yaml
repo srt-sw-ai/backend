@@ -1,12 +1,34 @@
 definitions:
+  dto.AuthDto:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
+  dto.CreateMarkerDto:
+    properties:
+      latitude:
+        type: number
+      longitude:
+        type: number
+      reportId:
+        type: integer
+      type:
+        type: string
+      userId:
+        type: integer
+    type: object
   dto.CreateReportDto:
     properties:
       content:
         type: string
       date:
         type: string
-      location:
-        type: string
+      latitude:
+        type: number
+      longitude:
+        type: number
       title:
         type: string
       type:
@@ -14,81 +36,444 @@ definitions:
     required:
     - content
     - date
-    - location
+    - latitude
+    - longitude
     - title
     - type
+    type: object
+  dto.EditProfileDto:
+    properties:
+      email:
+        type: string
+      nickName:
+        type: string
+    type: object
+  dto.ProfileDto:
+    properties:
+      email:
+        type: string
+      id:
+        type: integer
+      imageUri:
+        type: string
+      nickName:
+        type: string
+    type: object
+  dto.SignupDto:
+    properties:
+      email:
+        type: string
+      nickName:
+        type: string
+      password:
+        type: string
+    type: object
+  entity.User:
+    properties:
+      created_at:
+        type: string
+      deleted_at:
+        type: string
+      email:
+        type: string
+      hashed_refresh_token:
+        type: string
+      id:
+        type: integer
+      image_uri:
+        type: string
+      nickname:
+        type: string
+      password:
+        type: string
+      updated_at:
+        type: string
     type: object
 info:
   contact: {}
 paths:
-  /reports:
-    get:
-      description: 모든 리포트를 조회합니다
+  /auth/delete:
+    delete:
+      description: 사용자의 계정을 삭제합니다.
       produces:
       - application/json
       responses:
         "200":
-          description: OK
+          description: 계정이 삭제되었습니다
           schema:
             additionalProperties: true
             type: object
         "500":
-          description: Internal Server Error
+          description: 계정 삭제에 실패했습니다
           schema:
             additionalProperties: true
             type: object
-      summary: 모든 리포트 조회
+      summary: 계정 삭제
       tags:
-      - reports
+      - Auth
+  /auth/logout:
+    post:
+      description: 사용자가 로그아웃합니다.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 로그아웃되었습니다
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: 로그아웃에 실패했습니다
+          schema:
+            additionalProperties: true
+            type: object
+      summary: 로그아웃
+      tags:
+      - Auth
+  /auth/profile:
+    get:
+      description: 사용자의 프로필 정보를 조회합니다.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 프로필 정보
+          schema:
+            $ref: '#/definitions/dto.ProfileDto'
+        "404":
+          description: 프로필을 찾을 수 없습니다
+          schema:
+            additionalProperties: true
+            type: object
+      summary: 프로필 조회
+      tags:
+      - Auth
+    put:
+      consumes:
+      - application/json
+      description: 사용자의 프로필 정보를 수정합니다.
+      parameters:
+      - description: 프로필 수정 정보
+        in: body
+        name: editProfileDto
+        required: true
+        schema:
+          $ref: '#/definitions/dto.EditProfileDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 수정된 프로필 정보
+          schema:
+            $ref: '#/definitions/entity.User'
+        "400":
+          description: 잘못된 입력입니다
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: 사용자를 찾을 수 없습니다
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: 프로필 수정에 실패했습니다
+          schema:
+            additionalProperties: true
+            type: object
+      summary: 프로필 수정
+      tags:
+      - Auth
+  /auth/refresh:
+    post:
+      description: Refresh 토큰을 사용하여 새로운 Access 토큰을 발급받습니다.
+      parameters:
+      - description: Refresh 토큰
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 새로운 토큰이 발급되었습니다
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Refresh 토큰이 필요합니다
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 유효하지 않은 Refresh 토큰입니다
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: 토큰 생성에 실패했습니다
+          schema:
+            additionalProperties: true
+            type: object
+      summary: 토큰 갱신
+      tags:
+      - Auth
+  /auth/signin:
     post:
       consumes:
       - application/json
-      description: 새로운 리포트를 생성합니다
+      description: 사용자가 로그인합니다.
       parameters:
-      - description: 리포트 정보
+      - description: 로그인 정보
         in: body
-        name: report
+        name: authDto
+        required: true
+        schema:
+          $ref: '#/definitions/dto.AuthDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 로그인이 성공적으로 되었습니다
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: 잘못된 입력입니다
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 이메일 또는 비밀번호가 일치하지 않습니다
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: 토큰 생성에 실패했습니다
+          schema:
+            additionalProperties: true
+            type: object
+      summary: 로그인
+      tags:
+      - Auth
+  /auth/signup:
+    post:
+      consumes:
+      - application/json
+      description: 새로운 사용자를 등록합니다.
+      parameters:
+      - description: 회원가입 정보
+        in: body
+        name: signupDto
+        required: true
+        schema:
+          $ref: '#/definitions/dto.SignupDto'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: 회원가입이 완료되었습니다
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: 잘못된 입력입니다
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: 회원가입에 실패했습니다
+          schema:
+            additionalProperties: true
+            type: object
+      summary: 회원가입
+      tags:
+      - Auth
+  /map:
+    get:
+      description: 모든 마커를 조회합니다.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 마커 목록
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: 마커 조회에 실패했습니다
+          schema:
+            additionalProperties: true
+            type: object
+      summary: 모든 마커 조회
+      tags:
+      - Map
+    post:
+      consumes:
+      - application/json
+      description: 새로운 마커를 생성합니다.
+      parameters:
+      - description: 마커 정보
+        in: body
+        name: createMarkerDto
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateMarkerDto'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: 마커가 성공적으로 생성되었습니다
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: 잘못된 요청입니다
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: 마커 생성에 실패했습니다
+          schema:
+            additionalProperties: true
+            type: object
+      summary: 마커 생성
+      tags:
+      - Map
+  /map/{markerId}:
+    get:
+      description: 마커 ID로 마커를 조회합니다.
+      parameters:
+      - description: 마커 ID
+        in: path
+        name: markerId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 마커 정보
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: 잘못된 마커 ID입니다
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: 마커를 찾을 수 없습니다
+          schema:
+            additionalProperties: true
+            type: object
+      summary: 마커 조회
+      tags:
+      - Map
+  /reports:
+    get:
+      description: 모든 신고를 조회합니다.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 신고 목록
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: 신고 조회에 실패했습니다
+          schema:
+            additionalProperties: true
+            type: object
+      summary: 모든 신고 조회
+      tags:
+      - Reports
+    post:
+      consumes:
+      - application/json
+      description: 새로운 신고를 생성합니다.
+      parameters:
+      - description: 신고 정보
+        in: body
+        name: createReportDto
         required: true
         schema:
           $ref: '#/definitions/dto.CreateReportDto'
       produces:
       - application/json
       responses:
-        "200":
-          description: OK
+        "201":
+          description: 신고가 성공적으로 생성되었습니다
           schema:
             additionalProperties: true
             type: object
         "400":
-          description: Bad Request
+          description: 잘못된 요청입니다
           schema:
             additionalProperties: true
             type: object
         "500":
-          description: Internal Server Error
+          description: 신고 생성에 실패했습니다
           schema:
             additionalProperties: true
             type: object
-      summary: 새 리포트 생성
+      summary: 신고 생성
       tags:
-      - reports
-  /reports/user:
+      - Reports
+  /reports/{reportId}:
     get:
-      description: 특정 사용자의 모든 리포트를 조회합니다
+      description: 신고 ID로 신고를 조회합니다.
+      parameters:
+      - description: 신고 ID
+        in: path
+        name: reportId
+        required: true
+        type: integer
       produces:
       - application/json
       responses:
         "200":
-          description: OK
+          description: 신고 정보
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: 잘못된 신고 ID입니다
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: 신고를 찾을 수 없습니다
+          schema:
+            additionalProperties: true
+            type: object
+      summary: 신고 조회
+      tags:
+      - Reports
+  /reports/by-user:
+    get:
+      description: 사용자 ID로 신고를 조회합니다.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 사용자 신고 목록
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: 유효하지 않은 사용자 ID입니다
           schema:
             additionalProperties: true
             type: object
         "500":
-          description: Internal Server Error
+          description: 신고 조회에 실패했습니다
           schema:
             additionalProperties: true
             type: object
-      summary: 사용자별 리포트 조회
+      summary: 사용자 신고 조회
       tags:
-      - reports
+      - Reports
 swagger: "2.0"
