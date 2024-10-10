@@ -1,9 +1,20 @@
 package dto
 
 type SignupDto struct {
+	NickName string `json:"nickName"`
 	Email    string `json:"email"`
 	Password string `json:"password"`
-	NickName string `json:"nickName"`
+	Gender   string `json:"gender"`
+	Birthday string `json:"birthday"`
+	Phone    string `json:"phone"`
+	EmergencyPhone string `json:"emergencyPhone"`
+	Address  string `json:"address"`
+	Allergys string `json:"allergys"`
+	UnderlyingDiseases string `json:"underlyingDiseases"`
+	Medicines string `json:"medicines"`
+	BloodType string `json:"bloodType"`
+	Weight string `json:"weight"`
+	Height string `json:"height"`
 }
 
 type AuthDto struct {
@@ -14,6 +25,17 @@ type AuthDto struct {
 type EditProfileDto struct {
 	NickName string `json:"nickName"`
 	Email    string `json:"email"`
+	Gender   string `json:"gender"`
+	Birthday string `json:"birthday"`
+	Phone    string `json:"phone"`
+	EmergencyPhone string `json:"emergencyPhone"`
+	Address  string `json:"address"`
+	Allergys string `json:"allergys"`
+	UnderlyingDiseases string `json:"underlyingDiseases"`
+	Medicines string `json:"medicines"`
+	BloodType string `json:"bloodType"`
+	Weight string `json:"weight"`
+	Height string `json:"height"`
 }
 
 type ProfileDto struct {
@@ -21,4 +43,15 @@ type ProfileDto struct {
 	Email    string `json:"email"`
 	NickName string `json:"nickName"`
 	ImageUri string `json:"imageUri,omitempty"`
+	Gender   string `json:"gender"`
+	Birthday string `json:"birthday"`
+	Phone    string `json:"phone"`
+	EmergencyPhone string `json:"emergencyPhone"`
+	Address  string `json:"address"`
+	Allergys string `json:"allergys"`
+	UnderlyingDiseases string `json:"underlyingDiseases"`
+	Medicines string `json:"medicines"`
+	BloodType string `json:"bloodType"`
+	Weight string `json:"weight"`
+	Height string `json:"height"`
 }

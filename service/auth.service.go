@@ -121,6 +121,17 @@ func (s *AuthService) GetProfile(userId uint) common.ServiceResult {
 		Email:    user.Email,
 		NickName: user.NickName,
 		ImageUri: user.ImageUri,
+		Gender:   user.Gender,
+		Birthday: user.Birthday,
+		Phone:    user.Phone,
+		EmergencyPhone: user.EmergencyPhone,
+		Address:  user.Address,
+		Allergys: user.Allergys,
+		UnderlyingDiseases: user.UnderlyingDiseases,
+		Medicines: user.Medicines,
+		BloodType: user.BloodType,
+		Weight: user.Weight,
+		Height: user.Height,
 	}
 
 	return common.ServiceResult{Status: fiber.StatusOK, Data: profileDto}
@@ -134,6 +145,17 @@ func (s *AuthService) EditProfile(userId uint, editProfileDto dto.EditProfileDto
 
 	user.NickName = editProfileDto.NickName
 	user.Email = editProfileDto.Email
+	user.Gender = editProfileDto.Gender
+	user.Birthday = editProfileDto.Birthday
+	user.Phone = editProfileDto.Phone
+	user.EmergencyPhone = editProfileDto.EmergencyPhone
+	user.Address = editProfileDto.Address
+	user.Allergys = editProfileDto.Allergys
+	user.UnderlyingDiseases = editProfileDto.UnderlyingDiseases
+	user.Medicines = editProfileDto.Medicines
+	user.BloodType = editProfileDto.BloodType
+	user.Weight = editProfileDto.Weight
+	user.Height = editProfileDto.Height
 
 	if err := s.db.Save(&user).Error; err != nil {
 		return common.ServiceResult{Status: fiber.StatusInternalServerError, Data: fiber.Map{"error": "프로필 수정에 실패했습니다"}}
